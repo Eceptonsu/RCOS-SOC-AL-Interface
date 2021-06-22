@@ -4,24 +4,27 @@ using UnityEngine.SceneManagement;
 public class CharacterSelection : MonoBehaviour
 {
 	// 2-D array structure that stores all the outfits
-	public GameObject[][] outfits = new GameObject[1][];
+	private GameObject[][] outfits = new GameObject[2][];
 	private int selectedSection = 0;
 
 	// Character model
-	public GameObject[] characters;
+	[SerializeField] private GameObject[] characters;
+	[SerializeField] private GameObject[] deco;
 	private int selectedItem = 0;
 
-	private int[] PlayerData = new int[1];
+	private int[] PlayerData = new int[2];
 
 	// Random outfits will be generated after startup
-	void Awake()
+	void Start()
 	{
-		outfits[0] = characters;
+		for (int i = 0; i < PlayerData.Length; i++)
+		{
+			PlayerData[i] = 0;
+		}
 
-		outfits[0][selectedItem].SetActive(false);
-		selectedItem = Random.Range(0, characters.Length);
-		outfits[0][selectedItem].SetActive(true);
-		PlayerData[0] = selectedItem;
+		outfits[0] = characters;
+		outfits[1] = deco;
+		Randomize();
 	}
 
 	float speed = 1f;
@@ -40,8 +43,13 @@ public class CharacterSelection : MonoBehaviour
 	 */
 	public void NextItem()
 	{
+		selectedItem = PlayerData[selectedSection];
 		outfits[selectedSection][selectedItem].SetActive(false);
-		selectedItem = (selectedItem + 1) % outfits[selectedSection].Length;
+		selectedItem++;
+		if (selectedItem >= outfits[selectedSection].Length)
+		{
+			selectedItem = 0;
+		}
 		outfits[selectedSection][selectedItem].SetActive(true);
 
 		// Remeber the player's choice in section
@@ -50,6 +58,7 @@ public class CharacterSelection : MonoBehaviour
 
 	public void PreviousItem()
 	{
+		selectedItem = PlayerData[selectedSection];
 		outfits[selectedSection][selectedItem].SetActive(false);
 		selectedItem--;
 		if (selectedItem < 0)
@@ -67,7 +76,11 @@ public class CharacterSelection : MonoBehaviour
 	 */
 	public void NextSection()
 	{
-		selectedSection = (selectedSection + 1) % outfits.Length;
+		selectedSection = selectedSection + 1;
+		if (selectedSection >= outfits.Length) 
+		{
+			selectedSection = 0;
+		}
 	}
 
 	public void PreviousSection()
@@ -81,7 +94,8 @@ public class CharacterSelection : MonoBehaviour
 
 	public void StartGame()
 	{
-		PlayerPrefs.SetInt("selectedCharacter", selectedItem);
+		PlayerPrefs.SetInt("selectedCharacter", PlayerData[0]);
+		PlayerPrefs.SetInt("selectedDeco", PlayerData[1]);
 		SceneManager.LoadScene(1, LoadSceneMode.Single);
 	}
 
@@ -94,5 +108,20 @@ public class CharacterSelection : MonoBehaviour
 		#else
 			Application.Quit();
 		#endif
+	}
+
+	public void Randomize()
+	{
+		outfits[0][PlayerData[0]].SetActive(false);
+		selectedItem = Random.Range(0, characters.Length);
+		outfits[0][selectedItem].SetActive(true);
+		PlayerData[0] = selectedItem;
+		//Debug.Log("Data: " + selectedItem);
+
+		outfits[1][PlayerData[1]].SetActive(false);
+		selectedItem = Random.Range(0, deco.Length);
+		outfits[1][selectedItem].SetActive(true);
+		PlayerData[1] = selectedItem;
+		//Debug.Log("Data: " + selectedItem);
 	}
 }
