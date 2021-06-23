@@ -3,6 +3,8 @@ using UnityEngine.SceneManagement;
 
 public class CharacterSelection : MonoBehaviour
 {
+	[SerializeField] CameraMovement camera;
+
 	// 2-D array structure that stores all the outfits
 	private GameObject[][] outfits = new GameObject[2][];
 	private int selectedSection = 0;
@@ -81,6 +83,8 @@ public class CharacterSelection : MonoBehaviour
 		{
 			selectedSection = 0;
 		}
+
+		camera.SetCurView(selectedSection);
 	}
 
 	public void PreviousSection()
@@ -90,6 +94,8 @@ public class CharacterSelection : MonoBehaviour
 		{
 			selectedSection += outfits.Length;
 		}
+
+		camera.SetCurView(selectedSection);
 	}
 
 	public void StartGame()
