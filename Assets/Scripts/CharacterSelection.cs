@@ -4,17 +4,20 @@ using UnityEngine.SceneManagement;
 public class CharacterSelection : MonoBehaviour
 {
 	[SerializeField] CameraMovement camera;
-
+	
 	// 2-D array structure that stores all the outfits
-	private GameObject[][] outfits = new GameObject[2][];
+	private Material[][] outfits = new Material[3][];
 	private int selectedSection = 0;
 
 	// Character model
-	[SerializeField] private GameObject[] characters;
-	[SerializeField] private GameObject[] deco;
+	[SerializeField] private GameObject player;
+
+	[SerializeField] private Material[] face;
+	[SerializeField] private Material[] body;
+	[SerializeField] private Material[] exp;
 	private int selectedItem = 0;
 
-	private int[] PlayerData = new int[2];
+	private int[] PlayerData = new int[3];
 
 	// Random outfits will be generated after startup
 	void Start()
@@ -24,8 +27,9 @@ public class CharacterSelection : MonoBehaviour
 			PlayerData[i] = 0;
 		}
 
-		outfits[0] = characters;
-		outfits[1] = deco;
+		outfits[0] = face;
+		outfits[1] = body;
+		outfits[2] = exp;
 		Randomize();
 	}
 
@@ -46,13 +50,14 @@ public class CharacterSelection : MonoBehaviour
 	public void NextItem()
 	{
 		selectedItem = PlayerData[selectedSection];
-		outfits[selectedSection][selectedItem].SetActive(false);
 		selectedItem++;
 		if (selectedItem >= outfits[selectedSection].Length)
 		{
 			selectedItem = 0;
 		}
-		outfits[selectedSection][selectedItem].SetActive(true);
+		Material[] mats = player.GetComponent<MeshRenderer>().materials;
+		mats[selectedSection] = outfits[selectedSection][selectedItem];
+		player.GetComponent<MeshRenderer>().materials = mats;
 
 		// Remeber the player's choice in section
 		PlayerData[selectedSection] = selectedItem;
@@ -61,13 +66,14 @@ public class CharacterSelection : MonoBehaviour
 	public void PreviousItem()
 	{
 		selectedItem = PlayerData[selectedSection];
-		outfits[selectedSection][selectedItem].SetActive(false);
 		selectedItem--;
 		if (selectedItem < 0)
 		{
 			selectedItem += outfits[selectedSection].Length;
 		}
-		outfits[selectedSection][selectedItem].SetActive(true);
+		Material[] mats = player.GetComponent<MeshRenderer>().materials;
+		mats[selectedSection] = outfits[selectedSection][selectedItem];
+		player.GetComponent<MeshRenderer>().materials = mats;
 
 		// Remeber the player's choice in section
 		PlayerData[selectedSection] = selectedItem;
@@ -118,16 +124,28 @@ public class CharacterSelection : MonoBehaviour
 
 	public void Randomize()
 	{
-		outfits[0][PlayerData[0]].SetActive(false);
-		selectedItem = Random.Range(0, characters.Length);
-		outfits[0][selectedItem].SetActive(true);
+		selectedItem = Random.Range(0, face.Length);
+		Material[] mats = player.GetComponent<MeshRenderer>().materials;
+		mats[0] = outfits[0][selectedItem];
+		player.GetComponent<MeshRenderer>().materials = mats;
+
 		PlayerData[0] = selectedItem;
 		//Debug.Log("Data: " + selectedItem);
 
-		outfits[1][PlayerData[1]].SetActive(false);
-		selectedItem = Random.Range(0, deco.Length);
-		outfits[1][selectedItem].SetActive(true);
+		selectedItem = Random.Range(0, body.Length);
+		mats = player.GetComponent<MeshRenderer>().materials;
+		mats[1] = outfits[1][selectedItem];
+		player.GetComponent<MeshRenderer>().materials = mats;
+
 		PlayerData[1] = selectedItem;
+		//Debug.Log("Data: " + selectedItem);
+
+		selectedItem = Random.Range(0, exp.Length);
+		mats = player.GetComponent<MeshRenderer>().materials;
+		mats[2] = outfits[2][selectedItem];
+		player.GetComponent<MeshRenderer>().materials = mats;
+
+		PlayerData[0] = selectedItem;
 		//Debug.Log("Data: " + selectedItem);
 	}
 }
