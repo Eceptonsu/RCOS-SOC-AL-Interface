@@ -3,8 +3,8 @@ using UnityEngine.SceneManagement;
 
 public class CharacterSelection : MonoBehaviour
 {
-	[SerializeField] CameraMovement camera;
-	
+	[SerializeField] private CameraMovement _camera;
+
 	// 2-D array structure that stores all the outfits
 	private Material[][] outfits = new Material[3][];
 	private int selectedSection = 0;
@@ -42,6 +42,8 @@ public class CharacterSelection : MonoBehaviour
 		float y = Mathf.Sin(speed * Time.time) * delta;
 		Vector3 pos = new Vector3(transform.position.x, y, transform.position.z);
 		transform.position = pos;
+
+		//Debug.Log(PlayerData[0] + " " +  PlayerData[1] + " " + PlayerData[2]);
 	}
 
 	/*
@@ -90,7 +92,7 @@ public class CharacterSelection : MonoBehaviour
 			selectedSection = 0;
 		}
 
-		camera.SetCurView(selectedSection);
+		_camera.SetCurView(selectedSection);
 	}
 
 	public void PreviousSection()
@@ -101,7 +103,7 @@ public class CharacterSelection : MonoBehaviour
 			selectedSection += outfits.Length;
 		}
 
-		camera.SetCurView(selectedSection);
+		_camera.SetCurView(selectedSection);
 	}
 
 	public void StartGame()
@@ -124,28 +126,28 @@ public class CharacterSelection : MonoBehaviour
 
 	public void Randomize()
 	{
-		selectedItem = Random.Range(0, face.Length);
+		int selectedItem1 = Random.Range(0, face.Length);
 		Material[] mats = player.GetComponent<MeshRenderer>().materials;
-		mats[0] = outfits[0][selectedItem];
+		mats[0] = outfits[0][selectedItem1];
 		player.GetComponent<MeshRenderer>().materials = mats;
 
-		PlayerData[0] = selectedItem;
-		//Debug.Log("Data: " + selectedItem);
+		PlayerData[0] = selectedItem1;
+		//Debug.Log("Data1: " + selectedItem1);
 
-		selectedItem = Random.Range(0, body.Length);
+		int selectedItem2 = Random.Range(0, body.Length);
 		mats = player.GetComponent<MeshRenderer>().materials;
-		mats[1] = outfits[1][selectedItem];
+		mats[1] = outfits[1][selectedItem2];
 		player.GetComponent<MeshRenderer>().materials = mats;
 
-		PlayerData[1] = selectedItem;
-		//Debug.Log("Data: " + selectedItem);
+		PlayerData[1] = selectedItem2;
+		//Debug.Log("Data2: " + selectedItem2);
 
-		selectedItem = Random.Range(0, exp.Length);
+		int selectedItem3 = Random.Range(0, exp.Length);
 		mats = player.GetComponent<MeshRenderer>().materials;
-		mats[2] = outfits[2][selectedItem];
+		mats[2] = outfits[2][selectedItem3];
 		player.GetComponent<MeshRenderer>().materials = mats;
 
-		PlayerData[0] = selectedItem;
-		//Debug.Log("Data: " + selectedItem);
+		PlayerData[2] = selectedItem3;
+		//Debug.Log("Data3: " + selectedItem3);
 	}
 }

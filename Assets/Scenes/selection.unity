@@ -15146,13 +15146,19 @@ MonoBehaviour:
   face:
   - {fileID: 2100000, guid: cd09ece8390071d49888f6f0cdab9f94, type: 2}
   - {fileID: 2100000, guid: 9451407de9a735347aad7d89e378861d, type: 2}
+  - {fileID: 2100000, guid: 77b2ddbaf3dbbb64798b30d6dd491e52, type: 2}
   - {fileID: 2100000, guid: ebd4834f7a0adac47860930d010dd975, type: 2}
+  - {fileID: 2100000, guid: 104311ac462bc9c4d83d9574d0dabe21, type: 2}
   - {fileID: 2100000, guid: 8885d5f3bec2a1c448c98c8e6eda67e1, type: 2}
+  - {fileID: 2100000, guid: b56d70ef9d642de4282c1c57d26fd3e0, type: 2}
   body:
   - {fileID: 2100000, guid: cd09ece8390071d49888f6f0cdab9f94, type: 2}
   - {fileID: 2100000, guid: 9451407de9a735347aad7d89e378861d, type: 2}
+  - {fileID: 2100000, guid: 77b2ddbaf3dbbb64798b30d6dd491e52, type: 2}
   - {fileID: 2100000, guid: ebd4834f7a0adac47860930d010dd975, type: 2}
+  - {fileID: 2100000, guid: 104311ac462bc9c4d83d9574d0dabe21, type: 2}
   - {fileID: 2100000, guid: 8885d5f3bec2a1c448c98c8e6eda67e1, type: 2}
+  - {fileID: 2100000, guid: b56d70ef9d642de4282c1c57d26fd3e0, type: 2}
   exp:
   - {fileID: 2100000, guid: e71ea71401d6fed4eb25687a165bfe15, type: 2}
   - {fileID: 2100000, guid: 0a7df55186385ad40938be65de1736cb, type: 2}
