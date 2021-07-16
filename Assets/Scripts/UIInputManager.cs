@@ -110,7 +110,7 @@ public class UIInputManager : MonoBehaviour
 
    private void onStartClick()
    {
-      SceneManager.LoadScene("GameScene");
+      SceneManager.LoadScene("selection");
       Debug.Log("Changed to GameScene");
 
       // call to lambda to demonstrate use of credentials

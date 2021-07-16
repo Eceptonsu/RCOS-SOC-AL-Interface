@@ -27,8 +27,8 @@ public class CharacterSelection : MonoBehaviour
 			PlayerData[i] = 0;
 		}
 
-		outfits[0] = face;
-		outfits[1] = body;
+		outfits[0] = body;
+		outfits[1] = face;
 		outfits[2] = exp;
 		Randomize();
 	}
@@ -126,7 +126,7 @@ public class CharacterSelection : MonoBehaviour
 
 	public void Randomize()
 	{
-		int selectedItem1 = Random.Range(0, face.Length);
+		int selectedItem1 = Random.Range(0, body.Length);
 		Material[] mats = player.GetComponent<MeshRenderer>().materials;
 		mats[0] = outfits[0][selectedItem1];
 		player.GetComponent<MeshRenderer>().materials = mats;
@@ -134,7 +134,7 @@ public class CharacterSelection : MonoBehaviour
 		PlayerData[0] = selectedItem1;
 		//Debug.Log("Data1: " + selectedItem1);
 
-		int selectedItem2 = Random.Range(0, body.Length);
+		int selectedItem2 = Random.Range(0, face.Length);
 		mats = player.GetComponent<MeshRenderer>().materials;
 		mats[1] = outfits[1][selectedItem2];
 		player.GetComponent<MeshRenderer>().materials = mats;
