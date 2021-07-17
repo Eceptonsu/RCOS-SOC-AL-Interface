@@ -9,64 +9,80 @@ using System.Collections.Generic;
 // Also acts like the main manager script for the game.
 public class UIInputManager : MonoBehaviour
 {
-   public static string CachePath;
+    public static string CachePath;
 
-   public Button signupButton;
-   public Button loginButton;
-   public Button startButton;
-   public Button logoutButton;
-   public InputField emailFieldLogin;
-   public InputField passwordFieldLogin;
-   public InputField usernameField;
-   public InputField emailField;
-   public InputField passwordField;
+    public Button signupButton;
+    public Button loginButton;
+    public Button startButton;
+    public Button logoutButton;
+    public InputField emailFieldLogin;
+    public InputField passwordFieldLogin;
+    public InputField usernameField;
+    public InputField emailField;
+    public InputField passwordField;
 
-   private AuthenticationManager _authenticationManager;
-   private GameObject _unauthInterface;
-   private GameObject _authInterface;
-   private LambdaManager _lambdaManager;
-   private GameObject _loading;
-   private GameObject _welcome;
-   private GameObject _confirmEmail;
-   private GameObject _signupContainer;
+    private AuthenticationManager _authenticationManager;
+    private GameObject _unauthInterface;
+    private GameObject _authInterface;
+    private LambdaManager _lambdaManager;
+    private GameObject _loading;
+    private GameObject _welcome;
+    private GameObject _confirmEmail;
+    private GameObject _signupContainer;
+    private GameObject _error;
 
-   private List<Selectable> _fields;
-   private int _selectedFieldIndex = -1;
+    private List<Selectable> _fields;
+    private int _selectedFieldIndex = -1;
 
-   private void displayComponentsFromAuthStatus(bool authStatus)
-   {
-      if (authStatus)
-      {
-         // Debug.Log("User authenticated, show welcome screen with options");
-         _loading.SetActive(false);
-         _unauthInterface.SetActive(false);
-         _authInterface.SetActive(true);
-         _welcome.SetActive(true);
-      }
-      else
-      {
-         // Debug.Log("User not authenticated, activate/stay on login scene");
-         _loading.SetActive(false);
-         _unauthInterface.SetActive(true);
-         _authInterface.SetActive(false);
-      }
+    private string _username;
+    private string _errorMsg;
 
-      // clear out passwords
-      passwordFieldLogin.text = "";
-      passwordField.text = "";
+    private void displayComponentsFromAuthStatus(bool authStatus)
+    {
+        if (authStatus)
+        {
+            // Debug.Log("User authenticated, show welcome screen with options");
+            _loading.SetActive(false);
+            _unauthInterface.SetActive(false);
+            _authInterface.SetActive(true);
+            _welcome.SetActive(true);
 
-      // set focus to email field on login form
-      _selectedFieldIndex = -1;
-   }
+            UnityMainThreadDispatcher.Instance().Enqueue(() => _welcome.GetComponent<TMPro.TextMeshProUGUI>().text = "Welcome, " + _username);
+        }
+        else
+        {
+            // Debug.Log("User not authenticated, activate/stay on login scene");
+            _loading.SetActive(false);
+            _unauthInterface.SetActive(true);
+            _authInterface.SetActive(false);
 
-   private async void onLoginClicked()
-   {
-      _unauthInterface.SetActive(false);
-      _loading.SetActive(true);
-      // Debug.Log("onLoginClicked: " + emailFieldLogin.text + ", " + passwordFieldLogin.text);
-      bool successfulLogin = await _authenticationManager.Login(emailFieldLogin.text, passwordFieldLogin.text);
-      displayComponentsFromAuthStatus(successfulLogin);
-   }
+            UnityMainThreadDispatcher.Instance().Enqueue(() => _error.GetComponent<TMPro.TextMeshProUGUI>().text = _errorMsg);
+        }
+
+        // clear out passwords
+        passwordFieldLogin.text = "";
+        passwordField.text = "";
+
+        // set focus to email field on login form
+        _selectedFieldIndex = -1;
+    }
+
+    private async void onLoginClicked()
+    {
+        _unauthInterface.SetActive(false);
+        _loading.SetActive(true);
+        // Debug.Log("onLoginClicked: " + emailFieldLogin.text + ", " + passwordFieldLogin.text);
+        bool successfulLogin = await _authenticationManager.Login(emailFieldLogin.text, passwordFieldLogin.text);
+        
+        if (successfulLogin) 
+        {
+            string accesstoken = _authenticationManager.GetAccessToken();
+            _username = await _authenticationManager.GetUserNameFromProvider(accesstoken);
+        }
+
+        _errorMsg = _authenticationManager.GetErrorMsg();
+        displayComponentsFromAuthStatus(successfulLogin);
+    }
 
    private async void onSignupClicked()
    {
@@ -117,11 +133,18 @@ public class UIInputManager : MonoBehaviour
       _lambdaManager.ExecuteLambda();
    }
 
-   private async void RefreshToken()
-   {
-      bool successfulRefresh = await _authenticationManager.RefreshSession();
-      displayComponentsFromAuthStatus(successfulRefresh);
-   }
+    private async void RefreshToken()
+    {
+        bool successfulRefresh = await _authenticationManager.RefreshSession();
+
+        if (successfulRefresh)
+        {
+            string accesstoken = _authenticationManager.GetAccessToken();
+            _username = await _authenticationManager.GetUserNameFromProvider(accesstoken);
+        }
+
+        displayComponentsFromAuthStatus(successfulRefresh);
+    }
 
    void Start()
    {
@@ -183,26 +206,28 @@ public class UIInputManager : MonoBehaviour
       }
    }
 
-   void Awake()
-   {
-      CachePath = Application.persistentDataPath;
+    void Awake()
+    {
+        CachePath = Application.persistentDataPath;
 
-      _unauthInterface = GameObject.Find("UnauthInterface");
-      _authInterface = GameObject.Find("AuthInterface");
-      _loading = GameObject.Find("Loading");
-      _welcome = GameObject.Find("Welcome");
-      _confirmEmail = GameObject.Find("ConfirmEmail");
-      _signupContainer = GameObject.Find("SignupContainer");
+        _unauthInterface = GameObject.Find("UnauthInterface");
+        _authInterface = GameObject.Find("AuthInterface");
+        _loading = GameObject.Find("Loading");
+        _welcome = GameObject.Find("Welcome");
+        _confirmEmail = GameObject.Find("ConfirmEmail");
+        _signupContainer = GameObject.Find("SignupContainer");
+        _error = GameObject.Find("ERROR");
 
-      _unauthInterface.SetActive(false); // start as false so we don't just show the login screen during attempted token refresh
-      _authInterface.SetActive(false);
-      _welcome.SetActive(false);
-      _confirmEmail.SetActive(false);
-      _signupContainer.SetActive(true);
+        _unauthInterface.SetActive(false); // start as false so we don't just show the login screen during attempted token refresh
+        _authInterface.SetActive(false);
+        _welcome.SetActive(false);
+        _confirmEmail.SetActive(false);
+        _signupContainer.SetActive(true);
+        _error.SetActive(true);
 
-      _authenticationManager = FindObjectOfType<AuthenticationManager>();
-      _lambdaManager = FindObjectOfType<LambdaManager>();
+        _authenticationManager = FindObjectOfType<AuthenticationManager>();
+        _lambdaManager = FindObjectOfType<LambdaManager>();
 
-      _fields = new List<Selectable> { emailFieldLogin, passwordFieldLogin, loginButton, emailField, usernameField, passwordField, signupButton };
-   }
+        _fields = new List<Selectable> { emailFieldLogin, passwordFieldLogin, loginButton, emailField, usernameField, passwordField, signupButton };
+    }
 }

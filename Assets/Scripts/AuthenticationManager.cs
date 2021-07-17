@@ -18,10 +18,11 @@ public class AuthenticationManager : MonoBehaviour
    const string AppClientID = "3ulv8e58tnf0qbc2f18dodq5et"; //insert App client ID, found under App Client Settings
    const string userPoolId = "us-east-2_4pdcMhf20";
 
-   private AmazonCognitoIdentityProviderClient _provider;
-   private CognitoAWSCredentials _cognitoAWSCredentials;
-   private static string _userid = "";
-   private CognitoUser _user;
+    private AmazonCognitoIdentityProviderClient _provider;
+    private CognitoAWSCredentials _cognitoAWSCredentials;
+    private static string _userid = "";
+    private CognitoUser _user;
+    private string _errorMsg;
 
    public async Task<bool> RefreshSession()
    {
@@ -93,48 +94,49 @@ public class AuthenticationManager : MonoBehaviour
       return false;
    }
 
-   public async Task<bool> Login(string email, string password)
-   {
-      // Debug.Log("Login: " + email + ", " + password);
+    public async Task<bool> Login(string email, string password)
+    {
+        // Debug.Log("Login: " + email + ", " + password);
 
-      CognitoUserPool userPool = new CognitoUserPool(userPoolId, AppClientID, _provider);
-      CognitoUser user = new CognitoUser(email, AppClientID, userPool, _provider);
+        CognitoUserPool userPool = new CognitoUserPool(userPoolId, AppClientID, _provider);
+        CognitoUser user = new CognitoUser(email, AppClientID, userPool, _provider);
 
-      InitiateSrpAuthRequest authRequest = new InitiateSrpAuthRequest()
-      {
-         Password = password
-      };
+        InitiateSrpAuthRequest authRequest = new InitiateSrpAuthRequest()
+        {
+            Password = password
+        };
 
-      try
-      {
-         AuthFlowResponse authFlowResponse = await user.StartWithSrpAuthAsync(authRequest).ConfigureAwait(false);
+        try
+        {
+            AuthFlowResponse authFlowResponse = await user.StartWithSrpAuthAsync(authRequest).ConfigureAwait(false);
 
-         _userid = await GetUserIdFromProvider(authFlowResponse.AuthenticationResult.AccessToken);
-         // Debug.Log("Users unique ID from cognito: " + _userid);
+            _userid = await GetUserIdFromProvider(authFlowResponse.AuthenticationResult.AccessToken);
+            // Debug.Log("Users unique ID from cognito: " + _userid);
 
-         UserSessionCache userSessionCache = new UserSessionCache(
+            UserSessionCache userSessionCache = new UserSessionCache(
             authFlowResponse.AuthenticationResult.IdToken,
             authFlowResponse.AuthenticationResult.AccessToken,
             authFlowResponse.AuthenticationResult.RefreshToken,
             _userid);
 
-         SaveDataManager.SaveJsonData(userSessionCache);
+            SaveDataManager.SaveJsonData(userSessionCache);
 
-         // This how you get credentials to use for accessing other services.
-         // This IdentityPool is your Authorization, so if you tried to access using an
-         // IdentityPool that didn't have the policy to access your target AWS service, it would fail.
-         _cognitoAWSCredentials = user.GetCognitoAWSCredentials(IdentityPool, Region);
+            // This how you get credentials to use for accessing other services.
+            // This IdentityPool is your Authorization, so if you tried to access using an
+            // IdentityPool that didn't have the policy to access your target AWS service, it would fail.
+            _cognitoAWSCredentials = user.GetCognitoAWSCredentials(IdentityPool, Region);
 
-         _user = user;
+            _user = user;
 
-         return true;
-      }
-      catch (Exception e)
-      {
-         Debug.Log("Login failed, exception: " + e);
-         return false;
-      }
-   }
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Login failed, exception: " + e);
+            _errorMsg = e.Message;
+            return false;
+        }
+    }
 
    public async Task<bool> Signup(string username, string email, string password)
    {
@@ -213,10 +215,33 @@ public class AuthenticationManager : MonoBehaviour
       return subId;
    }
 
-   // Limitation note: so this GlobalSignOutAsync signs out the user from ALL devices, and not just the game.
-   // So if you had other sessions for your website or app, those would also be killed.  
-   // Currently, I don't think there is native support for granular session invalidation without some work arounds.
-   public async void SignOut()
+    public async Task<string> GetUserNameFromProvider(string accessToken)
+    {
+        string subName = "";
+
+        Task<GetUserResponse> responseTask = _provider.GetUserAsync(new GetUserRequest
+        {
+               AccessToken = accessToken
+        });
+
+        GetUserResponse responseObject = await responseTask;
+
+        foreach (var attribute in responseObject.UserAttributes)
+        {
+            if (attribute.Name == "preferred_username")
+            {
+                subName = attribute.Value;
+                break;
+            }
+        }
+
+        return subName;
+    }
+
+    // Limitation note: so this GlobalSignOutAsync signs out the user from ALL devices, and not just the game.
+    // So if you had other sessions for your website or app, those would also be killed.  
+    // Currently, I don't think there is native support for granular session invalidation without some work arounds.
+    public async void SignOut()
    {
       await _user.GlobalSignOutAsync();
 
@@ -240,6 +265,11 @@ public class AuthenticationManager : MonoBehaviour
       SaveDataManager.LoadJsonData(userSessionCache);
       return userSessionCache.getAccessToken();
    }
+
+    public string GetErrorMsg() 
+    {
+        return _errorMsg;
+    }
 
    void Awake()
    {
