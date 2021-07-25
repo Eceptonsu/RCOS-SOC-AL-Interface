@@ -14,8 +14,8 @@ public class AuthenticationManager : MonoBehaviour
    public static Amazon.RegionEndpoint Region = Amazon.RegionEndpoint.GetBySystemName("us-east-2");
 
    // In production, should probably keep these in a config file
-   const string IdentityPool = "us-east-2:f5dbad57-a98d-41e9-9a14-de47afde92be"; //insert your Cognito User Pool ID, found under General Settings
-   const string AppClientID = "3ulv8e58tnf0qbc2f18dodq5et"; //insert App client ID, found under App Client Settings
+   const string IdentityPool = "us-east-2:f5dbad57-a98d-41e9-9a14-de47afde92be"; // Cognito User Pool ID, found under General Settings
+   const string AppClientID = "3ulv8e58tnf0qbc2f18dodq5et"; // App client ID, found under App Client Settings
    const string userPoolId = "us-east-2_4pdcMhf20";
 
     private AmazonCognitoIdentityProviderClient _provider;
