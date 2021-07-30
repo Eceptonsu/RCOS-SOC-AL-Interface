@@ -4,6 +4,7 @@ using Amazon.Extensions.CognitoAuthentication;
 using Amazon.CognitoIdentity;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
+using Amazon.CognitoSync;
 using System;
 using System.Threading.Tasks;
 using System.Net;
@@ -14,9 +15,9 @@ public class AuthenticationManager : MonoBehaviour
    public static Amazon.RegionEndpoint Region = Amazon.RegionEndpoint.GetBySystemName("us-east-2");
 
    // In production, should probably keep these in a config file
-   const string IdentityPool = "us-east-2:f5dbad57-a98d-41e9-9a14-de47afde92be"; // Cognito User Pool ID, found under General Settings
-   const string AppClientID = "3ulv8e58tnf0qbc2f18dodq5et"; // App client ID, found under App Client Settings
-   const string userPoolId = "us-east-2_4pdcMhf20";
+   const string IdentityPool = "us-east-2:166aed30-aef6-4107-b6f0-52045e5637d3"; // Cognito User Pool ID, found under General Settings
+   const string AppClientID = "3ufqcro28rhtvj2mq8ufg0814"; // App client ID, found under App Client Settings
+   const string userPoolId = "us-east-2_WgB7saxn6";
 
     private AmazonCognitoIdentityProviderClient _provider;
     private CognitoAWSCredentials _cognitoAWSCredentials;
@@ -24,7 +25,10 @@ public class AuthenticationManager : MonoBehaviour
     private CognitoUser _user;
     private string _errorMsg;
 
-   public async Task<bool> RefreshSession()
+    private AmazonCognitoSyncConfig clientConfig = new AmazonCognitoSyncConfig { RegionEndpoint = Region };
+    //private CognitoSyncManager syncManager = new CognitoSyncManager(credentials, clientConfig);
+
+    public async Task<bool> RefreshSession()
    {
       Debug.Log("RefreshSession");
 
@@ -170,6 +174,7 @@ public class AuthenticationManager : MonoBehaviour
       catch (Exception e)
       {
          Debug.Log("Sign up failed, exception: " + e);
+         _errorMsg = e.Message;
          return false;
       }
    }

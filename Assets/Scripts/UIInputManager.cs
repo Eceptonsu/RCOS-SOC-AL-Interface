@@ -80,7 +80,11 @@ public class UIInputManager : MonoBehaviour
             _username = await _authenticationManager.GetUserNameFromProvider(accesstoken);
         }
 
-        _errorMsg = _authenticationManager.GetErrorMsg();
+        if (emailFieldLogin.text == "" || passwordFieldLogin.text == "")
+            _errorMsg = "Please enter username or password.";
+        else
+            _errorMsg = _authenticationManager.GetErrorMsg();
+
         displayComponentsFromAuthStatus(successfulLogin);
     }
 
@@ -110,17 +114,23 @@ public class UIInputManager : MonoBehaviour
       {
          _confirmEmail.SetActive(false);
 
-         // set focus to email field on signup form
          _selectedFieldIndex = 3;
-      }
+
+        if (usernameField.text == "" || emailField.text == "" || passwordField.text == "")
+            _errorMsg = "Please enter all required information.";
+        else
+            _errorMsg = _authenticationManager.GetErrorMsg();
+        }
 
       _loading.SetActive(false);
       _unauthInterface.SetActive(true);
-   }
+      displayComponentsFromAuthStatus(false);
+    }
 
    private void onLogoutClick()
    {
       _authenticationManager.SignOut();
+      _errorMsg = "Successfully signed out.";
       displayComponentsFromAuthStatus(false);
    }
 
