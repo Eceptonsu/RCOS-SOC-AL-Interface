@@ -4,7 +4,6 @@ using Amazon.Extensions.CognitoAuthentication;
 using Amazon.CognitoIdentity;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
-using Amazon.CognitoSync;
 using System;
 using System.Threading.Tasks;
 using System.Net;
@@ -25,7 +24,7 @@ public class AuthenticationManager : MonoBehaviour
     private CognitoUser _user;
     private string _errorMsg;
 
-    private AmazonCognitoSyncConfig clientConfig = new AmazonCognitoSyncConfig { RegionEndpoint = Region };
+    //private AmazonCognitoSyncConfig clientConfig = new AmazonCognitoSyncConfig { RegionEndpoint = Region };
     //private CognitoSyncManager syncManager = new CognitoSyncManager(credentials, clientConfig);
 
     public async Task<bool> RefreshSession()
