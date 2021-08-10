@@ -4,6 +4,8 @@ using Amazon.Extensions.CognitoAuthentication;
 using Amazon.CognitoIdentity;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
+using Amazon.CognitoSync;
+using Amazon.CognitoSync.Model;
 using System;
 using System.Threading.Tasks;
 using System.Net;
@@ -24,7 +26,9 @@ public class AuthenticationManager : MonoBehaviour
     private CognitoUser _user;
     private string _errorMsg;
 
-    //private AmazonCognitoSyncConfig clientConfig = new AmazonCognitoSyncConfig { RegionEndpoint = Region };
+    private AmazonCognitoSyncConfig clientConfig = new AmazonCognitoSyncConfig { RegionEndpoint = Region };
+    private Dataset userData = new Dataset();
+    //userData.Put("myKey", "newValue");
     //private CognitoSyncManager syncManager = new CognitoSyncManager(credentials, clientConfig);
 
     public async Task<bool> RefreshSession()
@@ -79,7 +83,7 @@ public class AuthenticationManager : MonoBehaviour
 
          return true;
       }
-      catch (NotAuthorizedException ne)
+      catch (Amazon.CognitoIdentityProvider.Model.NotAuthorizedException ne) // May have bug
       {
          // https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-with-identity-providers.html
          // refresh tokens will expire - user must login manually every x days (see user pool -> app clients -> details)
@@ -130,7 +134,7 @@ public class AuthenticationManager : MonoBehaviour
             _cognitoAWSCredentials = user.GetCognitoAWSCredentials(IdentityPool, Region);
 
             _user = user;
-
+            
             return true;
         }
         catch (Exception e)

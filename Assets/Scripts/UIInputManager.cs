@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using System.Collections;
 
 // Manages all the text and button inputs
 // Also acts like the main manager script for the game.
@@ -15,6 +16,7 @@ public class UIInputManager : MonoBehaviour
     public Button loginButton;
     public Button startButton;
     public Button logoutButton;
+    public Button forgetButton;
     public InputField emailFieldLogin;
     public InputField passwordFieldLogin;
     public InputField usernameField;
@@ -34,8 +36,11 @@ public class UIInputManager : MonoBehaviour
     private List<Selectable> _fields;
     private int _selectedFieldIndex = -1;
 
+    private int _errorCount = 0;
     private string _username;
     private string _errorMsg;
+    private bool _refresh = false;
+    private bool _lock = false;
 
     private void displayComponentsFromAuthStatus(bool authStatus)
     {
@@ -57,6 +62,7 @@ public class UIInputManager : MonoBehaviour
             _authInterface.SetActive(false);
 
             UnityMainThreadDispatcher.Instance().Enqueue(() => _error.GetComponent<TMPro.TextMeshProUGUI>().text = _errorMsg);
+            if (_refresh && !_lock) _ = StartCoroutine(nameof(ErrorTextFade));
         }
 
         // clear out passwords
@@ -73,12 +79,17 @@ public class UIInputManager : MonoBehaviour
         _loading.SetActive(true);
         // Debug.Log("onLoginClicked: " + emailFieldLogin.text + ", " + passwordFieldLogin.text);
         bool successfulLogin = await _authenticationManager.Login(emailFieldLogin.text, passwordFieldLogin.text);
-        
-        if (successfulLogin) 
+
+        if (successfulLogin)
         {
             string accesstoken = _authenticationManager.GetAccessToken();
             _username = await _authenticationManager.GetUserNameFromProvider(accesstoken);
         }
+        else 
+            _errorCount++;
+
+        //Debug.Log(_errorCount);
+        if (_errorCount >= 3) forgetButton.gameObject.SetActive(true);
 
         if (emailFieldLogin.text == "" || passwordFieldLogin.text == "")
             _errorMsg = "Please enter username or password.";
@@ -140,8 +151,14 @@ public class UIInputManager : MonoBehaviour
       Debug.Log("Changed to GameScene");
 
       // call to lambda to demonstrate use of credentials
-      _lambdaManager.ExecuteLambda();
+      //_lambdaManager.ExecuteLambda();
    }
+
+    // Need to change the website later
+    private void onForgetClick() 
+    {
+        Application.OpenURL("http://google.com");
+    }
 
     private async void RefreshToken()
     {
@@ -154,6 +171,7 @@ public class UIInputManager : MonoBehaviour
         }
 
         displayComponentsFromAuthStatus(successfulRefresh);
+        _refresh = true;
     }
 
    void Start()
@@ -174,6 +192,7 @@ public class UIInputManager : MonoBehaviour
         loginButton.onClick.AddListener(onLoginClicked);
         startButton.onClick.AddListener(onStartClick);
         logoutButton.onClick.AddListener(onLogoutClick);
+        forgetButton.onClick.AddListener(onForgetClick);
    }
 
    void Update()
@@ -216,6 +235,31 @@ public class UIInputManager : MonoBehaviour
       }
    }
 
+    IEnumerator ErrorTextFade()
+    {
+        _lock = true;
+
+        Color c = _error.GetComponent<TMPro.TextMeshProUGUI>().color;
+        c.a = 1f;
+        _error.GetComponent<TMPro.TextMeshProUGUI>().color = c;
+
+        yield return new WaitForSeconds(5f);
+
+        for (float ft = 1f; ft >= 0; ft -= 0.1f)
+        {
+            c = _error.GetComponent<TMPro.TextMeshProUGUI>().color;
+            c.a = ft;
+            _error.GetComponent<TMPro.TextMeshProUGUI>().color = c;
+            yield return new WaitForSeconds(.05f);
+        }
+
+        c = _error.GetComponent<TMPro.TextMeshProUGUI>().color;
+        c.a = 0f;
+        _error.GetComponent<TMPro.TextMeshProUGUI>().color = c;
+
+        _lock = false;
+    }
+
     void Awake()
     {
         CachePath = Application.persistentDataPath;
@@ -228,6 +272,7 @@ public class UIInputManager : MonoBehaviour
         _signupContainer = GameObject.Find("SignupContainer");
         _error = GameObject.Find("ERROR");
 
+        forgetButton.gameObject.SetActive(false);
         _unauthInterface.SetActive(false); // start as false so we don't just show the login screen during attempted token refresh
         _authInterface.SetActive(false);
         _welcome.SetActive(false);
