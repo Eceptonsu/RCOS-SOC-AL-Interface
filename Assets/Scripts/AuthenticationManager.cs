@@ -12,12 +12,10 @@ using System.Net;
 
 public class AuthenticationManager : MonoBehaviour
 {
-   // the AWS region of where your services live
    public static Amazon.RegionEndpoint Region = Amazon.RegionEndpoint.GetBySystemName("us-east-2");
 
-   // In production, should probably keep these in a config file
-   const string IdentityPool = "us-east-2:166aed30-aef6-4107-b6f0-52045e5637d3"; // Cognito User Pool ID, found under General Settings
-   const string AppClientID = "3ufqcro28rhtvj2mq8ufg0814"; // App client ID, found under App Client Settings
+   const string IdentityPool = "us-east-2:166aed30-aef6-4107-b6f0-52045e5637d3";
+   const string AppClientID = "3ufqcro28rhtvj2mq8ufg0814";
    const string userPoolId = "us-east-2_WgB7saxn6";
 
     private AmazonCognitoIdentityProviderClient _provider;
@@ -43,7 +41,6 @@ public class AuthenticationManager : MonoBehaviour
       {
          CognitoUserPool userPool = new CognitoUserPool(userPoolId, AppClientID, _provider);
 
-         // apparently the username field can be left blank for a token refresh request
          CognitoUser user = new CognitoUser("", AppClientID, userPool, _provider);
 
          // The "Refresh token expiration (days)" (Cognito->UserPool->General Settings->App clients->Show Details) is the
